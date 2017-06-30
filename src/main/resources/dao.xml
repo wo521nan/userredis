@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--<context:property-placeholder location="classpath*:redis.properties"/>-->
+    <!--&lt;!&ndash;没有配置读写分离前的数据源设置  &ndash;&gt;-->
+    <!--<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">-->
+        <!--<property name="maxTotal" value="${maxTotal}" />-->
+        <!--<property name="maxIdle" value="${maxIdle}" />-->
+        <!--<property name="minIdle" value="${minIdle}" />-->
+        <!--<property name="maxWaitMillis" value="10000" />-->
+        <!--<property name="minEvictableIdleTimeMillis" value="300000"></property>-->
+        <!--<property name="numTestsPerEvictionRun" value="3"></property>-->
+        <!--<property name="timeBetweenEvictionRunsMillis" value="60000"></property>-->
+    <!--</bean>-->
+    <!--&lt;!&ndash;工厂类配置&ndash;&gt;-->
+    <!--<bean id="jedisConnectionFactory"-->
+          <!--class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">-->
+        <!--<property name="hostName" value="${hostR}" />-->
+        <!--<property name="port" value="${portR}" />-->
+        <!--<property name="poolConfig" ref="jedisPoolConfig" />-->
+        <!--<property name="timeout" value="15000"></property>-->
+        <!--<property name="usePool" value="true"></property>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; redisTemplate配置 &ndash;&gt;-->
+    <!--<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate"-->
+          <!--p:connection-factory-ref="jedisConnectionFactory">-->
+        <!--&lt;!&ndash;<property name="connectionFactory"   ref="jedisConnectionFactory" />&ndash;&gt;-->
+
+        <!--<property name="keySerializer">-->
+            <!--<bean-->
+                    <!--class="org.springframework.data.redis.serializer.StringRedisSerializer" />-->
+        <!--</property>-->
+        <!--<property name="hashKeySerializer">-->
+            <!--<bean-->
+                    <!--class="org.springframework.data.redis.serializer.StringRedisSerializer" />-->
+        <!--</property>-->
+        <!--<property name="valueSerializer">-->
+            <!--<bean-->
+                    <!--class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />-->
+        <!--</property>-->
+        <!--<property name="hashValueSerializer">-->
+            <!--<bean-->
+                    <!--class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />-->
+        <!--</property>-->
+    <!--</bean>-->
+    <!--<bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate"-->
+          <!--p:connection-factory-ref="jedisConnectionFactory" />-->
+    <!--&lt;!&ndash;<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">&ndash;&gt;-->
+        <!--&lt;!&ndash;<property name="maxTotal" value="${redis.maxActive}"></property>&ndash;&gt;-->
+        <!--&lt;!&ndash;<property name="maxIdle" value="${redis.pool.maxIdle}"></property>&ndash;&gt;-->
+        <!--&lt;!&ndash;<property name="minIdle" value="4"></property>&ndash;&gt;-->
+        <!--&lt;!&ndash;<property name="maxWaitMillis" value="${redis.pool.maxWait}"></property>&ndash;&gt;-->
+        <!--&lt;!&ndash;<property name="minEvictableIdleTimeMillis" value="300000"></property>&ndash;&gt;-->
+        <!--&lt;!&ndash;<property name="numTestsPerEvictionRun" value="3"></property>&ndash;&gt;-->
+        <!--&lt;!&ndash;<property name="timeBetweenEvictionRunsMillis" value="60000"></property>&ndash;&gt;-->
+        <!--&lt;!&ndash;<property name="testOnBorrow" value="${redis.pool.testOnBorrow}"></property>&ndash;&gt;-->
+    <!--&lt;!&ndash;</bean>&ndash;&gt;-->
+
+    <!--&lt;!&ndash;<bean id="suishenRedisTemplate"&ndash;&gt;-->
+          <!--&lt;!&ndash;class="suishen.redis.SuishenRedisTemplate">&ndash;&gt;-->
+        <!--&lt;!&ndash;<constructor-arg index="0" value="${redis.host}:${redis.port}"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<constructor-arg index="1" value="${redis.host}:${redis.port}"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<constructor-arg index="2" ref="jedisPoolConfig"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<constructor-arg index="3" value="3000"/>&ndash;&gt;-->
+    <!--&lt;!&ndash;</bean>&ndash;&gt;-->
+    <context:property-placeholder location="classpath:redis.properties" />
+
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="${redis.maxIdle}" />
+        <!--<property name="maxActive" value="${redis.maxActive}" />-->
+        <!--<property name="maxWait" value="${redis.maxWait}" />-->
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+    </bean>
+
+    <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+          p:host-name="${redis.host}"
+          p:port="${redis.port}"
+          p:password="${redis.pass}"
+          p:pool-config-ref="poolConfig"/>
+
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+        <property name="connectionFactory"   ref="connectionFactory" />
+    </bean>
+
+    <bean id="userDao" class="com.gong.dao.impl.UserDaoImpl">
+        <property name="redisTemplate" ref="redisTemplate"></property>
+    </bean>
+</beans>
